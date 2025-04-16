@@ -1,0 +1,243 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    font-family: 'Inter var', system-ui, -apple-system, sans-serif;
+    @apply antialiased;
+  }
+
+  body {
+    @apply bg-gradient-to-br from-gray-50 to-gray-100 min-h-screen;
+  }
+}
+
+@layer components {
+  .modern-input {
+    @apply block w-full px-4 py-3 rounded-lg border-gray-200 focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all duration-200;
+  }
+
+  .modern-button-primary {
+    @apply inline-flex items-center px-4 py-2.5 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-all duration-200 hover:scale-105;
+  }
+
+  .modern-button-secondary {
+    @apply inline-flex items-center px-4 py-2.5 border border-gray-300 rounded-lg shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-all duration-200 hover:scale-105;
+  }
+
+  .modern-card {
+    @apply bg-white overflow-hidden shadow-lg rounded-xl hover:shadow-xl transition-all duration-300 hover:scale-[1.02] border border-gray-100;
+  }
+
+  .modern-modal {
+    @apply fixed inset-0 flex items-center justify-center z-50;
+  }
+
+  .modern-modal-overlay {
+    @apply absolute inset-0 bg-gray-500 bg-opacity-75 backdrop-blur-sm transition-opacity;
+  }
+
+  .modern-modal-content {
+    @apply relative bg-white rounded-xl max-w-lg w-full mx-4 shadow-xl border border-gray-100;
+  }
+
+  .stats-card {
+    @apply relative bg-white pt-5 px-4 pb-12 sm:pt-6 sm:px-6 shadow-lg rounded-xl overflow-hidden flex items-center hover:shadow-xl transition-all duration-300 hover:scale-[1.02] border border-gray-100;
+  }
+
+  .stats-card-icon {
+    @apply p-3 rounded-xl flex items-center justify-center bg-opacity-10;
+  }
+
+  .upload-zone {
+    @apply mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-xl cursor-pointer hover:border-primary-500 transition-all duration-200 hover:bg-primary-50;
+  }
+
+  .nav-link {
+    @apply flex items-center px-4 py-2.5 text-sm font-medium rounded-lg transition-all duration-200;
+  }
+
+  .nav-link-active {
+    @apply bg-primary-50 text-primary-700 scale-105;
+  }
+
+  .nav-link-inactive {
+    @apply text-gray-600 hover:bg-gray-50 hover:text-gray-900 hover:scale-105;
+  }
+
+  .table-header {
+    @apply px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider bg-gray-50;
+  }
+
+  .table-cell {
+    @apply px-6 py-4 whitespace-nowrap text-sm text-gray-900;
+  }
+
+  .badge {
+    @apply inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium transition-all duration-200 hover:scale-105;
+  }
+
+  .badge-success {
+    @apply bg-success-100 text-success-800 border border-success-200;
+  }
+
+  .badge-warning {
+    @apply bg-warning-100 text-warning-800 border border-warning-200;
+  }
+
+  .badge-error {
+    @apply bg-error-100 text-error-800 border border-error-200;
+  }
+
+  .badge-info {
+    @apply bg-primary-100 text-primary-800 border border-primary-200;
+  }
+
+  /* Özel Animasyonlar */
+  .hover-lift {
+    @apply transition-all duration-300 hover:-translate-y-1 hover:shadow-lg;
+  }
+
+  .hover-glow {
+    @apply transition-all duration-300 hover:shadow-[0_0_15px_rgba(0,0,0,0.1)];
+  }
+
+  .pulse {
+    @apply animate-[pulse_2s_cubic-bezier(0.4,0,0.6,1)_infinite];
+  }
+
+  /* Form Elemanları */
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="number"],
+  input[type="tel"],
+  input[type="url"],
+  input[type="search"],
+  input[type="datetime-local"],
+  select,
+  textarea {
+    @apply rounded-lg border-gray-200 focus:border-primary-500 focus:ring focus:ring-primary-200 focus:ring-opacity-50 transition-all duration-200;
+  }
+
+  /* Scrollbar Tasarımı */
+  ::-webkit-scrollbar {
+    @apply w-2;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-gray-100 rounded-full;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-gray-300 rounded-full hover:bg-gray-400 transition-colors duration-200;
+  }
+
+  /* Kart Hover Efektleri */
+  .card-hover {
+    @apply transition-all duration-300 hover:shadow-lg hover:-translate-y-1 hover:bg-gray-50;
+  }
+
+  /* Buton Hover Efektleri */
+  .button-hover {
+    @apply transition-all duration-200 hover:shadow-md active:scale-95;
+  }
+
+  /* Loading Spinner */
+  .spinner {
+    @apply animate-spin rounded-full border-4 border-gray-200 border-t-primary-500;
+  }
+}
+
+/* Toast Stilleri */
+.Toastify__toast {
+  @apply rounded-xl shadow-lg border border-gray-100;
+}
+
+.Toastify__toast-body {
+  @apply font-sans;
+}
+
+/* Tremor Bileşen Stilleri */
+.tremor-Card-root {
+  @apply rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100;
+}
+
+.tremor-Legend-root {
+  @apply justify-center;
+}
+
+.tremor-ProgressBar-root {
+  @apply rounded-full;
+}
+
+.tremor-BarChart-root,
+.tremor-DonutChart-root {
+  @apply h-72;
+}
+
+/* Sayfa Geçiş Animasyonları */
+.page-transition-enter {
+  @apply opacity-0;
+}
+
+.page-transition-enter-active {
+  @apply opacity-100 transition-opacity duration-300;
+}
+
+.page-transition-exit {
+  @apply opacity-100;
+}
+
+.page-transition-exit-active {
+  @apply opacity-0 transition-opacity duration-300;
+}
+
+/* Özel Gölgeler */
+.shadow-top {
+  box-shadow: 0 -4px 6px -1px rgba(0, 0, 0, 0.1), 0 -2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.shadow-inner-lg {
+  box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.06);
+}
+
+/* Gradient Arka Planlar */
+.bg-gradient-corporate {
+  @apply bg-gradient-to-br from-primary-500 to-primary-700;
+}
+
+.bg-gradient-light {
+  @apply bg-gradient-to-br from-gray-50 to-gray-100;
+}
+
+/* Özel Kenarlıklar */
+.border-dashed-hover {
+  @apply border-2 border-dashed border-gray-300 hover:border-primary-500 transition-colors duration-200;
+}
+
+/* Metin Stilleri */
+.text-gradient {
+  @apply bg-clip-text text-transparent bg-gradient-to-r from-primary-600 to-secondary-500;
+}
+
+.heading-1 {
+  @apply text-3xl font-bold text-gray-900;
+}
+
+.heading-2 {
+  @apply text-2xl font-semibold text-gray-900;
+}
+
+.heading-3 {
+  @apply text-xl font-medium text-gray-900;
+}
+
+.text-body {
+  @apply text-base text-gray-600;
+}
+
+.text-small {
+  @apply text-sm text-gray-500;
+}

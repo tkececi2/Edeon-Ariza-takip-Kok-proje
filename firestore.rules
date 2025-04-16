@@ -1,0 +1,198 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Temel fonksiyonlar
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isAdmin() {
+      return isAuthenticated() && 
+        get(/databases/$(database)/documents/kullanicilar/$(request.auth.uid)).data.rol == 'yonetici';
+    }
+    
+    function isTechnician() {
+      let user = get(/databases/$(database)/documents/kullanicilar/$(request.auth.uid));
+      return isAuthenticated() && 
+        (user.data.rol == 'tekniker' || user.data.rol == 'muhendis');
+    }
+    
+    function isCustomer() {
+      return isAuthenticated() && 
+        get(/databases/$(database)/documents/kullanicilar/$(request.auth.uid)).data.rol == 'musteri';
+    }
+    
+    function isGuard() {
+      return isAuthenticated() && 
+        get(/databases/$(database)/documents/kullanicilar/$(request.auth.uid)).data.rol == 'bekci';
+    }
+    
+    function hasAccessToSaha(sahaId) {
+      let user = get(/databases/$(database)/documents/kullanicilar/$(request.auth.uid));
+      return user.data.sahalar != null && (sahaId in user.data.sahalar || user.data.sahalar.hasAny([sahaId]));
+    }
+
+    function hasAccessToSantral(santralId) {
+      let user = get(/databases/$(database)/documents/kullanicilar/$(request.auth.uid));
+      return user.data.sahalar != null && (santralId in user.data.sahalar || user.data.sahalar.hasAny([santralId]));
+    }
+
+    // Santraller koleksiyonu için kurallar
+    match /santraller/{santralId} {
+      allow read: if isAuthenticated() && (
+        isAdmin() || 
+        isTechnician() ||
+        (isCustomer() && hasAccessToSantral(santralId))
+      );
+      allow create: if isAuthenticated() && (isAdmin() || isTechnician());
+      allow update: if isAuthenticated() && (isAdmin() || isTechnician());
+      allow delete: if isAdmin();
+    }
+
+    // Kullanıcılar koleksiyonu için kurallar
+    match /kullanicilar/{userId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin() || request.auth.uid == userId;
+      allow create: if true;
+    }
+
+    // Üretim verileri koleksiyonu için kurallar
+    match /uretimVerileri/{veriId} {
+      allow read: if isAuthenticated() && (
+        isAdmin() || 
+        isTechnician() ||
+        (isCustomer() && hasAccessToSantral(resource.data.santralId))
+      );
+      allow list: if isAuthenticated() && (
+        isAdmin() || 
+        isTechnician() ||
+        (isCustomer() && hasAccessToSantral(resource.data.santralId))
+      );
+      allow create: if isAuthenticated() && (isAdmin() || isTechnician());
+      allow update: if isAuthenticated() && (isAdmin() || isTechnician());
+      allow delete: if isAdmin();
+    }
+
+    // Stok koleksiyonu
+    match /stoklar/{stokId} {
+      allow read: if isAuthenticated() && (
+        isAdmin() || 
+        isTechnician() || 
+        (isCustomer() && hasAccessToSaha(resource.data.sahaId))
+      );
+      allow create: if isAuthenticated() && (isAdmin() || isTechnician());
+      allow update: if isAuthenticated() && (isAdmin() || isTechnician());
+      allow delete: if isAdmin();
+    }
+
+    // Diğer koleksiyonların kuralları aynı kalacak
+    match /elektrikBakimlar/{bakimId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && (isAdmin() || isTechnician());
+      allow update: if isAuthenticated() && (isAdmin() || isTechnician());
+      allow delete: if isAdmin();
+    }
+    
+    match /mekanikBakimlar/{bakimId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && (isAdmin() || isTechnician());
+      allow update: if isAuthenticated() && (isAdmin() || isTechnician());
+      allow delete: if isAdmin();
+    }
+    
+    match /arizalar/{arizaId} {
+      allow read: if isAuthenticated() && (
+        isAdmin() || 
+        isTechnician() || 
+        (isCustomer() && hasAccessToSaha(resource.data.saha))
+      );
+      allow create: if isAuthenticated();
+      allow update: if isAuthenticated() && (
+        isAdmin() ||
+        isTechnician() ||
+        resource.data.olusturanKisi == request.auth.uid ||
+        (isCustomer() && hasAccessToSaha(resource.data.saha))
+      );
+      allow delete: if isAdmin();
+    }
+    
+    match /sahalar/{sahaId} {
+      allow read: if isAuthenticated();
+      allow create, update: if isAuthenticated() && (isAdmin() || isTechnician());
+      allow delete: if isAdmin();
+    }
+    
+    match /isRaporlari/{raporId} {
+      allow read: if isAuthenticated();
+      allow create, update: if isAuthenticated() && (isAdmin() || isTechnician());
+      allow delete: if isAdmin() || (isTechnician() && resource.data.olusturanKisi.id == request.auth.uid);
+    }
+    
+    match /elektrikKesintileri/{kesintilerId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && (isAdmin() || isTechnician());
+      allow update: if isAuthenticated() && (
+        isAdmin() ||
+        isTechnician() ||
+        (isCustomer() && hasAccessToSaha(resource.data.sahaId))
+      );
+      allow delete: if isAdmin();
+    }
+    
+    match /invertorKontroller/{kontrolId} {
+      allow read: if isAuthenticated();
+      allow create, update: if isAuthenticated() && (isAdmin() || isTechnician());
+      allow delete: if isAdmin() || (isTechnician() && resource.data.olusturanKisi.id == request.auth.uid);
+    }
+    
+    // Bildirimler için kurallar
+    match /bildirimler/{bildirimId} {
+      allow read: if isAuthenticated() && request.auth.uid == resource.data.kullaniciId;
+      allow create: if isAuthenticated();
+      allow update: if isAuthenticated() && request.auth.uid == resource.data.kullaniciId;
+      allow delete: if isAuthenticated() && (
+        request.auth.uid == resource.data.kullaniciId || isAdmin()
+      );
+    }
+    
+    // Malzemeler Koleksiyonu
+    match /malzemeler/{malzemeId} {
+      allow read: if isAuthenticated();
+      allow create, update: if isAuthenticated() && (isAdmin() || isTechnician());
+      allow delete: if isAdmin();
+    }
+    
+    // Şirketler koleksiyonu için kurallar
+    match /sirketler/{sirketId} {
+      allow read: if true; // Giriş sayfasında şirket listesine erişim için
+      allow write: if isAdmin();
+    }
+    
+    // Demirbaşlar Koleksiyonu  
+    match /demirbaslar/{demirbasId} {
+      allow read: if isAuthenticated();
+      allow create, update: if isAuthenticated() && (isAdmin() || isTechnician());
+      allow delete: if isAdmin();
+    }
+    
+    // Vardiya Bildirimleri Koleksiyonu
+    match /vardiyaBildirimleri/{bildirimId} {
+      allow read: if isAuthenticated() && (
+        isAdmin() ||
+        isTechnician() ||
+        (isGuard() && hasAccessToSaha(resource.data.sahaId)) ||
+        (isCustomer() && hasAccessToSaha(resource.data.sahaId))
+      );
+      allow create: if isAuthenticated() && (isAdmin() || isTechnician() || isGuard());
+      allow update, delete: if isAuthenticated() && (resource.data.vardiyaciId == request.auth.uid || isAdmin());
+    }
+    
+    // Notifications Koleksiyonu
+    match /notifications/{notificationId} {
+      allow read: if isAuthenticated() && (resource.data.userId == request.auth.uid || isAdmin());
+      allow write: if isAuthenticated() && (request.resource.data.userId == request.auth.uid || isAdmin() || isTechnician());
+      allow update: if isAuthenticated() && (resource.data.userId == request.auth.uid || isAdmin());
+    }
+  }
+}
